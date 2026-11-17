@@ -214,6 +214,14 @@ local function onPlayerAdded(player)
 	player:SetAttribute("BaseLocked", false)
 	player:SetAttribute("LockSeconds", 0)
 
+	-- Click-to-move: clicking the ground walks the character there, which
+	-- lets mouse-only players (and phone remote-desktop testers, whose WASD
+	-- keys never reach the game) move around. Desktop keyboard movement
+	-- still works in this mode; it only ADDS click navigation.
+	pcall(function()
+		player.DevComputerMovementMode = Enum.DevComputerMovementMode.ClickToMove
+	end)
+
 	-- Restore saved progress (session-only fallback when this returns nil).
 	local save = loadSave(player.UserId)
 	if save then

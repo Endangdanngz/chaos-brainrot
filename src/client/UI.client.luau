@@ -414,11 +414,16 @@ startScreen.BackgroundTransparency = 0.08
 startScreen.ZIndex = 10
 startScreen.Parent = gui
 
-makeLabel(startScreen, "Title", "CHAOS BRAINROT", UDim2.new(1, 0, 0, 84), UDim2.new(0, 0, 0.16, 0), {
+-- Start screen layout: title, subtitle, description and the play button all
+-- hang off ONE shared baseline (Y = 0.12) with fixed pixel offsets, so each
+-- element keeps its own band with clear spacing at any viewport height.
+-- (Independent scale Y positions used to collide on shorter screens, which
+-- let the description text draw over the subtitle.)
+makeLabel(startScreen, "Title", "CHAOS BRAINROT", UDim2.new(1, 0, 0, 80), UDim2.new(0, 0, 0.12, 0), {
 	TextSize = 64, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Center,
 	TextColor3 = Color3.fromRGB(255, 226, 130),
 }).ZIndex = 11
-makeLabel(startScreen, "Subtitle", "M U T A T I O N   I S L A N D", UDim2.new(1, 0, 0, 44), UDim2.new(0, 0, 0.16, 88), {
+makeLabel(startScreen, "Subtitle", "M U T A T I O N   I S L A N D", UDim2.new(1, 0, 0, 40), UDim2.new(0, 0, 0.12, 94), {
 	TextSize = 30, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Center,
 	TextColor3 = Color3.fromRGB(190, 150, 255),
 }).ZIndex = 11
@@ -426,13 +431,14 @@ local howToLabel = makeLabel(startScreen, "HowTo",
 	"Hunt wild brainrots across 4 zones. Carry them home to your base to earn cash every second.\n"
 		.. "Deposit to roll mutations worth up to x35. Survive chaos events. Rebirth to unlock the Crystal Void.\n"
 		.. "And watch your base -- other players can steal what you display!",
-	UDim2.new(0, 760, 0, 96), UDim2.new(0.5, 0, 0.42, 0), {
-		AnchorPoint = Vector2.new(0.5, 0), TextSize = 18, Font = Enum.Font.Gotham,
+	UDim2.new(0.88, 0, 0, 108), UDim2.new(0.5, 0, 0.12, 152), {
+		AnchorPoint = Vector2.new(0.5, 0), TextSize = 17, Font = Enum.Font.Gotham,
 		TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Top,
 	})
+howToLabel.TextWrapped = true
 howToLabel.ZIndex = 11
 
-local playButton = makeButton(startScreen, "Play", "PLAY", UDim2.new(0, 260, 0, 62), UDim2.new(0.5, 0, 0.62, 0), Color3.fromRGB(64, 178, 92), {
+local playButton = makeButton(startScreen, "Play", "PLAY", UDim2.new(0, 260, 0, 62), UDim2.new(0.5, 0, 0.12, 288), Color3.fromRGB(64, 178, 92), {
 	AnchorPoint = Vector2.new(0.5, 0), TextSize = 26,
 })
 playButton.ZIndex = 11
