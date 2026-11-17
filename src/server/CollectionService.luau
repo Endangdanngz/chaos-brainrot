@@ -219,21 +219,50 @@ function CollectionService.PlaceOnPedestal(profile, model, slot)
 	return true
 end
 
+-- Lowest free pedestal slot for a profile (displayed items remember their
+-- slot, so a stolen piece leaves a gap that later deposits refill first).
+function CollectionService.FindFreeSlot(profile)
+	if not profile.BaseIndex then
+		return nil
+	end
+	local used = {}
+	for _, item in ipairs(profile.Displayed) do
+		if item.Slot then
+			used[item.Slot] = true
+		end
+	end
+	for slot = 1, Config.PedestalsPerBase do
+		if not used[slot] then
+			return slot
+		end
+	end
+	return nil
+end
+
 function CollectionService.DepositCarried(profile)
 	local carrying = profile.Carrying
 	if not carrying then
 		return false
 	end
 	local player = profile.Player
-	if #profile.Displayed >= Config.PedestalsPerBase then
-		GameState.GetRemote("Notify"):FireClient(player, "Your base is full! (" .. Config.PedestalsPerBase .. " pedestals)")
+
+	-- Validate placement BEFORE touching the carry weld, so a failed deposit
+	-- never strands the model.
+	local slot = CollectionService.FindFreeSlot(profile)
+	if not slot then
+		if profile.BaseIndex then
+			GameState.GetRemote("Notify"):FireClient(player, "Your base is full! (" .. Config.PedestalsPerBase .. " pedestals)")
+		else
+			GameState.GetRemote("Notify"):FireClient(player, "You have no base plot on this server!")
+		end
 		return false
 	end
 
 	local model = carrying.Model
 	local entry = BrainrotData.ById[carrying.EntryId]
-	if not entry or not model then
+	if not entry or not model or not model.Parent then
 		profile.Carrying = nil
+		player:SetAttribute("Carrying", "")
 		return false
 	end
 
@@ -254,7 +283,6 @@ function CollectionService.DepositCarried(profile)
 	MutationService.ApplyVisual(model, mutation)
 	local income = MutationService.IncomeFor(entry, mutation)
 
-	local slot = #profile.Displayed + 1
 	if not CollectionService.PlaceOnPedestal(profile, model, slot) then
 		return false
 	end
@@ -264,6 +292,7 @@ function CollectionService.DepositCarried(profile)
 		EntryId = entry.Id,
 		Mutation = mutation,
 		Income = income,
+		Slot = slot,
 	})
 	profile.Carrying = nil
 	player:SetAttribute("Carrying", "")
@@ -289,7 +318,7 @@ function CollectionService.RestoreDisplay(profile)
 		local entry = BrainrotData.ById[saved.EntryId]
 		if entry then
 			local mutation = saved.Mutation or "Normal"
-			if not MutationService.GetMultiplier(mutation) then
+			if not MutationService.IsValid(mutation) then
 				mutation = "Normal"
 			end
 			local model = BrainrotData.BuildModel(entry)
@@ -300,6 +329,7 @@ function CollectionService.RestoreDisplay(profile)
 					EntryId = entry.Id,
 					Mutation = mutation,
 					Income = MutationService.IncomeFor(entry, mutation),
+					Slot = i,
 				})
 				GameState.MarkDiscovered(profile, entry.Id)
 			else
@@ -365,6 +395,43 @@ function CollectionService.Start()
 				local profile = GameState.GetProfile(player)
 				local root = profile and getRoot(player)
 				if profile and root then
+					if profile.Carrying then
+						-- Carry maintenance: if the model was destroyed, clear
+						-- the carry; if it fell into the ocean, drop it back
+						-- into the wild; if the player respawned, the weld
+						-- still points at the old head -- re-attach it.
+						local carrying = profile.Carrying
+						local model = carrying.Model
+						if not model or not model.Parent then
+							profile.Carrying = nil
+							player:SetAttribute("Carrying", "")
+							carrying = nil
+						elseif model:GetPivot().Position.Y < -5 then
+							profile.Carrying = nil
+							player:SetAttribute("Carrying", "")
+							CollectionService.RegisterWild(model, carrying.EntryId, carrying.Mutation)
+							carrying = nil
+						else
+							local character = player.Character
+							local head = character and character:FindFirstChild("Head")
+							local body = model:FindFirstChild("Body")
+							if head and body then
+								local weld = body:FindFirstChild("CarryWeld")
+								if not weld or weld.Part1 ~= head then
+									if weld then
+										weld:Destroy()
+									end
+									body.Anchored = false
+									model:PivotTo(head.CFrame * CFrame.new(0, 3.1, 0))
+									local newWeld = Instance.new("WeldConstraint")
+									newWeld.Name = "CarryWeld"
+									newWeld.Part0 = body
+									newWeld.Part1 = head
+									newWeld.Parent = body
+								end
+							end
+						end
+					end
 					if profile.Carrying then
 						-- Deposit at the player's own pad.
 						if profile.BaseIndex then

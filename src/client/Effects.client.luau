@@ -126,9 +126,10 @@ eventAnnounce.OnClientEvent:Connect(function(eventKey)
 			stormAura.Speed = NumberRange.new(2, 4)
 			stormAura.SpreadAngle = Vector2.new(180, 180)
 			stormAura.Parent = root
+			local myAura = stormAura
 			task.spawn(function()
 				task.wait(Config.MutationStormDuration + 2)
-				if stormAura and stormAura.Name == "StormAura" then
+				if stormAura == myAura then
 					removeStormAura()
 				end
 			end)

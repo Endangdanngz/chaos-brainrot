@@ -422,14 +422,15 @@ makeLabel(startScreen, "Subtitle", "M U T A T I O N   I S L A N D", UDim2.new(1,
 	TextSize = 30, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Center,
 	TextColor3 = Color3.fromRGB(190, 150, 255),
 }).ZIndex = 11
-makeLabel(startScreen, "HowTo",
+local howToLabel = makeLabel(startScreen, "HowTo",
 	"Hunt wild brainrots across 4 zones. Carry them home to your base to earn cash every second.\n"
 		.. "Deposit to roll mutations worth up to x35. Survive chaos events. Rebirth to unlock the Crystal Void.\n"
 		.. "And watch your base -- other players can steal what you display!",
 	UDim2.new(0, 760, 0, 96), UDim2.new(0.5, 0, 0.42, 0), {
 		AnchorPoint = Vector2.new(0.5, 0), TextSize = 18, Font = Enum.Font.Gotham,
 		TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Top,
-	}).ZIndex = 11
+	})
+howToLabel.ZIndex = 11
 
 local playButton = makeButton(startScreen, "Play", "PLAY", UDim2.new(0, 260, 0, 62), UDim2.new(0.5, 0, 0.62, 0), Color3.fromRGB(64, 178, 92), {
 	AnchorPoint = Vector2.new(0.5, 0), TextSize = 26,

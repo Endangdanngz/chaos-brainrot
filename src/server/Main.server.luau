@@ -92,10 +92,16 @@ local function writeSave(profile)
 	if not leaderstats then
 		return
 	end
+	local cashValue = leaderstats:FindFirstChild("Cash")
+	local gemsValue = leaderstats:FindFirstChild("Gems")
+	local rebirthsValue = leaderstats:FindFirstChild("Rebirths")
+	if not cashValue or not gemsValue or not rebirthsValue then
+		return
+	end
 	local data = {
-		Cash = leaderstats.Cash.Value,
-		Gems = leaderstats.Gems.Value,
-		Rebirths = leaderstats.Rebirths.Value,
+		Cash = cashValue.Value,
+		Gems = gemsValue.Value,
+		Rebirths = rebirthsValue.Value,
 		Displayed = displayed,
 		Discovered = discovered,
 	}

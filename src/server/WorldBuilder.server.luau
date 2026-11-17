@@ -212,13 +212,12 @@ for i = 1, 46 do
 end
 
 -- Rebirth portal ring (teleports to Crystal Void once unlocked)
-local portalCenter = Vector3.new(52, 3, 96)
-local portalPad = makePart("VoidPortalPad", Vector3.new(7, 0.6, 7), CFrame.new(portalCenter + Vector3.new(0, 0.4, 0)), Color3.fromRGB(140, 90, 255), Enum.Material.Neon)
+local portalCenter = Vector3.new(52, 2.8, 96)
+local portalPad = makePart("VoidPortalPad", Vector3.new(7, 0.6, 7), CFrame.new(portalCenter + Vector3.new(0, 0.35, 0)), Color3.fromRGB(140, 90, 255), Enum.Material.Neon)
 for i = 1, 10 do
 	local angle = (i / 10) * math.pi * 2
-	local blockPos = portalCenter + Vector3.new(math.cos(angle) * 5.2, 4.6 + math.sin(angle) * 5.2 * 0, math.sin(angle) * 0)
-	-- ring stands vertical, facing the meadow centre
-	blockPos = portalCenter + Vector3.new(math.cos(angle) * 5.2, 4.4 + math.sin(angle) * 5.2, 0)
+	-- Ring stands vertical in the X/Y plane above the pad.
+	local blockPos = portalCenter + Vector3.new(math.cos(angle) * 5.2, 5.8 + math.sin(angle) * 5.2, 0)
 	local block = makePart("PortalRing", Vector3.new(1.1, 1.1, 1.1), CFrame.new(blockPos), Color3.fromRGB(168, 120, 255), Enum.Material.Neon)
 	block.Shape = Enum.PartType.Ball
 end
@@ -418,8 +417,7 @@ for index = 1, BASE_COUNT do
 
 	-- Deposit pad (front, toward the island centre) and spawn pad (back).
 	local towardCenter = Vector3.new(-center.X, 0, -center.Z).Unit
-	local depositPad = makePart("DepositPad", Vector3.new(9, 0.5, 9), CFrame.new(center + towardCenter * 13 + Vector3.new(0, 0.6, 0)), Color3.fromRGB(90, 255, 140), Enum.Material.Neon, folder)
-	depositPad.Shape = Enum.PartType.Cylinder
+	local depositPad = makeDisc("DepositPad", 4.5, 0.5, center + towardCenter * 13 + Vector3.new(0, 0.6, 0), Color3.fromRGB(90, 255, 140), Enum.Material.Neon, folder)
 	depositPad.CanCollide = false
 	local spawnPad = makePart("SpawnPad", Vector3.new(5, 0.5, 5), CFrame.new(center - towardCenter * 16 + Vector3.new(0, 0.6, 0)), Color3.fromRGB(255, 214, 90), Enum.Material.Neon, folder)
 	spawnPad.CanCollide = false

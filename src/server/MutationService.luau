@@ -24,6 +24,10 @@ function MutationService.GetMultiplier(mutationName)
 	return MULTIPLIERS[mutationName] or 1
 end
 
+function MutationService.IsValid(mutationName)
+	return type(mutationName) == "string" and MULTIPLIERS[mutationName] ~= nil
+end
+
 function MutationService.IncomeFor(entry, mutationName)
 	return entry.Income * MutationService.GetMultiplier(mutationName)
 end
