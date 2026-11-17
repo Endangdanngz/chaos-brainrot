@@ -456,5 +456,53 @@ playButton.MouseButton1Click:Connect(function()
 		end
 	end
 	task.wait(0.5)
+	-- End state is explicit: hidden AND removed, so no invisible layer is
+	-- left behind that could absorb mouse input meant for the world (the
+	-- click-to-move handler below depends on world clicks reaching it).
+	startScreen.Visible = false
 	startScreen:Destroy()
+end)
+
+-- ---------------------------------------------------------------------------
+-- Click-to-move (mouse-only control)
+-- ---------------------------------------------------------------------------
+-- The server sets DevComputerMovementMode to ClickToMove, but the built-in
+-- mode never engaged for our mouse-only tester (Studio over a phone remote
+-- desktop), so movement is driven here directly: a left click that no GUI
+-- consumed is raycast into the world and the character walks to the hit
+-- point via Humanoid:MoveTo. Clicking a wild brainrot walks the player into
+-- it, which triggers the normal pickup. Real GUI buttons are untouched --
+-- clicks they handle arrive with gameProcessedEvent = true and are ignored
+-- here. A fresh click while walking simply retargets the walk; stopping is
+-- the Humanoid's own behaviour (arrival / MoveTo timeout).
+local UserInputService = game:GetService("UserInputService")
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if gameProcessedEvent then
+		return
+	end
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1 then
+		return
+	end
+	local character = player.Character
+	if not character then
+		return
+	end
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or humanoid.Health <= 0 then
+		return
+	end
+	local camera = workspace.CurrentCamera
+	if not camera then
+		return
+	end
+	local mouse = player:GetMouse()
+	local ray = camera:ViewportPointToRay(mouse.X, mouse.Y)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { character }
+	local hit = workspace:Raycast(ray.Origin, ray.Direction * 1000, params)
+	if hit then
+		humanoid:MoveTo(hit.Position)
+	end
 end)
